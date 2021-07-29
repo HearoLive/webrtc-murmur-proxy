@@ -116,7 +116,7 @@ function EstablishPeerConnection(signalingSocket, log, lostTrackCallback, before
             .then(() => peerConnection.createAnswer(), err => log("Error in setRemoteDescription:", err))
             .then(answer => peerConnection.setLocalDescription(answer), err => log("Error in createAnswer:", err))
             .then(() => signalingSocket.sendJson({answer: answer}), err => log("Error in setLocalDescription:", err))  //Should be able to send localDescription except for Firefox bug
-            .catch(() => log("Error in sendJson:", err))
+            .catch(err => log("Error in sendJson:", err))
         }
       }
     }
