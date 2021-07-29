@@ -103,6 +103,7 @@ function EstablishPeerConnection(signalingSocket, log, lostTrackCallback, before
         log("ERROR: Wrong type for answer:", json.answer.type)
       } else {
         peerConnection.setRemoteDescription(json.answer)
+          .catch(err => log("Error calling setRemoteDescription from answer:", err))
       }
     }
 
@@ -113,7 +114,7 @@ function EstablishPeerConnection(signalingSocket, log, lostTrackCallback, before
       } else {
         if (peerConnection.signalingState === "stable") {    //If we've already sent out an offer, ignore this one.  Client will do rollback.
           peerConnection.setRemoteDescription(json.offer)
-            .then(() => peerConnection.createAnswer(), err => log("Error in setRemoteDescription:", err))
+            .then(() => peerConnection.createAnswer(), err => log("Error calling setRemoteDescription from offer:", err))
             .then(answer => peerConnection.setLocalDescription(answer), err => log("Error in createAnswer:", err))
             .then(() => signalingSocket.sendJson({answer: answer}), err => log("Error in setLocalDescription:", err))  //Should be able to send localDescription except for Firefox bug
             .catch(err => log("Error in sendJson:", err))
