@@ -67,6 +67,7 @@ function EstablishPeerConnection(signalingSocket, log, lostTrackCallback, before
             offer: peerConnection.localDescription
           }))
       })
+      .catch(err => log("Error in onnegotiationneeded:", err))
   }
 
   peerConnection.onicecandidate = evt => {
@@ -120,6 +121,7 @@ function EstablishPeerConnection(signalingSocket, log, lostTrackCallback, before
                   signalingSocket.sendJson({answer: answer})  //Should be able to send localDescription except for Firefox bug
                 })
             })
+            .catch(err => log("Error responding to offer:", err))
         }
       }
     }
