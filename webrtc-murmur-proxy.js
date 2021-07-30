@@ -71,25 +71,31 @@ const webServer = https.createServer({cert: fs.readFileSync("cert.pem"), key: fs
         console.log(`[${id}]`, msg, ...args)
       }
     }
+    const status = (msg, ...args) => {
+      console.log(`[${id}]`, msg, ...args)
+    }
+    const error = (msg, ...args) => {
+      console.error(`[${id}]`, msg, ...args)
+    }
 
     openConnections++
-    log("WebSocket opened.  Open connections:", openConnections)
+    status("WebSocket opened.  Open connections:", openConnections)
 
     webSocket.sendJson({userId: id})
 
     webSocket.on("close", () => {
       openConnections--
-      log("WebSocket closed.  Open connections:", openConnections)
+      status("WebSocket closed.  Open connections:", openConnections)
     })
 
     webSocket.on("error", () => {
       openConnections--
-      log("WebSocket error.  Open connections:", openConnections)
+      error("WebSocket error.  Open connections:", openConnections)
     })
 
-    EstablishPeerConnection(webSocket, log,
+    EstablishPeerConnection(webSocket, log, error,
       sessionId => {
-        log("lost track for sessionId", sessionId)
+        error("Lost track for sessionId", sessionId)
         tracks[sessionId] = null
       },
       peerConnection => {
@@ -122,7 +128,7 @@ const webServer = https.createServer({cert: fs.readFileSync("cert.pem"), key: fs
               })
 
               murmurSocket.on("error", err => {
-                log("Error on Murmur socket:", err.message);
+                error("Error on Murmur socket:", err.message);
               });
             
               //Called every 10ms to upload audio data to the RTCAudioSource
@@ -150,14 +156,14 @@ const webServer = https.createServer({cert: fs.readFileSync("cert.pem"), key: fs
                     trackData.bufferPos = 0
                   }
                 } else {
-                  log("ERROR: Partial data in upload buffer")
+                  error("ERROR: Partial data in upload buffer")
                 }
               }
 
               const handleAudioFromMurmur = pds => {
                 const typeTarget = pds.getByte()
                 if (typeTarget !== 128) {
-                  log("ERROR: Unexpected type/target value:", typeTarget)
+                  error("ERROR: Unexpected type/target value:", typeTarget)
                   return
                 }
                 const sessionId = pds.getVarint()
@@ -169,7 +175,7 @@ const webServer = https.createServer({cert: fs.readFileSync("cert.pem"), key: fs
                 }
                 const remaining = pds.remaining()
                 if ((remaining !== opusLength) && (remaining !== opusLength + 12)) {    //Allow for 12 bytes of position data on end
-                  log("ERROR: Opus data length mismatch", pds.remaining(), opusLength)
+                  error("ERROR: Opus data length mismatch", pds.remaining(), opusLength)
                   return
                 }
                 let trackData = tracks[sessionId]
@@ -376,7 +382,7 @@ const webServer = https.createServer({cert: fs.readFileSync("cert.pem"), key: fs
         dataChannel.onclose = dataChannel.onclosing = shutdown
       
         dataChannel.onerror = err => {
-          log("dataChannel error:", err)
+          error("dataChannel error:", err)
         }
         
         //

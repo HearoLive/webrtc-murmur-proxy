@@ -5,7 +5,7 @@ const RTCPeerConnection = require('wrtc').RTCPeerConnection;
 const TIME_TO_CONNECTED = 20000;
 const TIME_TO_RECONNECTED = 20000;
 
-function EstablishPeerConnection(signalingSocket, log, lostTrackCallback, beforeOffer) {
+function EstablishPeerConnection(signalingSocket, log, error, lostTrackCallback, beforeOffer) {
   let timeoutTimer
 
   const close = () => {
@@ -67,7 +67,7 @@ function EstablishPeerConnection(signalingSocket, log, lostTrackCallback, before
             offer: peerConnection.localDescription
           }))
       })
-      .catch(err => log("Error in onnegotiationneeded:", err))
+      .catch(err => error("Error in onnegotiationneeded:", err))
   }
 
   peerConnection.onicecandidate = evt => {
@@ -94,14 +94,14 @@ function EstablishPeerConnection(signalingSocket, log, lostTrackCallback, before
       json = JSON.parse(msg)
     }
     catch (err) {
-      log("JSON parsing error: " + msg.toString())
+      error("JSON parsing error: " + msg.toString())
       return
     }
 
     if (json.answer) {
       log("answer received")
       if (json.answer.type !== "answer") {
-        log("ERROR: Wrong type for answer:", json.answer.type)
+        error("ERROR: Wrong type for answer:", json.answer.type)
       } else {
         peerConnection.setRemoteDescription(json.answer)
       }
@@ -110,7 +110,7 @@ function EstablishPeerConnection(signalingSocket, log, lostTrackCallback, before
     if (json.offer) {
       log("offer received")
       if (json.offer.type !== "offer") {
-        log("ERROR: Wrong type for offer:", json.offer.type)
+        error("ERROR: Wrong type for offer:", json.offer.type)
       } else {
         if (peerConnection.signalingState === "stable") {    //If we've already sent out an offer, ignore this one.  Client will do rollback.
           peerConnection.setRemoteDescription(json.offer)
@@ -121,7 +121,7 @@ function EstablishPeerConnection(signalingSocket, log, lostTrackCallback, before
                   signalingSocket.sendJson({answer: answer})  //Should be able to send localDescription except for Firefox bug
                 })
             })
-            .catch(err => log("Error responding to offer:", err))
+            .catch(err => error("Error responding to offer:", err))
         }
       }
     }
@@ -131,7 +131,7 @@ function EstablishPeerConnection(signalingSocket, log, lostTrackCallback, before
       if (json.ice.candidate) {
         peerConnection.addIceCandidate(json.ice)
           .catch(err => {
-            log("Error setting ICE candidate:", err)
+            error("Error setting ICE candidate:", err)
           })
       }
     }
