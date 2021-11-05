@@ -498,6 +498,9 @@ function generateId() {
       if (counter2 === 16) {
         counter2 = 0
         counter3++
+        if (counter3 === 16) {
+          counter3 = 0
+        }
       }
     }
   }
