@@ -242,7 +242,12 @@ const webServer = https.createServer({cert: fs.readFileSync("cert.pem"), key: fs
                   return
                 }
                 if (dataChannel.readyState === "open") {
-                  dataChannel.send(data)
+                  try {
+                    dataChannel.send(data)
+                  }
+                  catch (err) {
+                    log("Error writing to DataChannel:", err)
+                  }
                 } else {
                   log("Warning: Writing to DataChannel when readyState is", dataChannel.readyState)
                 }
