@@ -8,7 +8,7 @@
   },
   "author": "Matt Toschlog, Hearo.Live",
   "dependencies": {
-    "@discordjs/opus": "^0.1.0",
+    "@discordjs/opus": "^0.8.0",
     "body": "^5.1.0",
     "tar": "^4.4.15",
     "wrtc": "^0.4.4",
